@@ -5,19 +5,33 @@ import java.util.Arrays;
 public class GameState {
 
     private final Cell[] cells;
+    private final String instructions;
 
-    private GameState(Cell[] cells) {
+    private GameState(Cell[] cells, String instructions) {
         this.cells = cells;
+        this.instructions = instructions;
     }
 
     public static GameState forGame(Game game) {
         Cell[] cells = getCells(game);
-        return new GameState(cells);
+        String instructions;
+        Player winner = game.getWinner();
+        boolean boardFull = Arrays.stream(cells).noneMatch(Cell::isPlayable);
+
+        if (winner != null) {
+            instructions = "Winner: " + (winner == Player.PLAYER0 ? "X" : "O");
+        } else if (boardFull) {
+            instructions = "Draw!";
+        } else {
+            instructions = "Next turn: " + (game.getPlayer() == Player.PLAYER0 ? "X" : "O");
+        }
+        return new GameState(cells, instructions);
     }
 
     public Cell[] getCells() {
         return this.cells;
     }
+    
 
     /**
      * toString() of GameState will return the string representing
@@ -26,8 +40,8 @@ public class GameState {
     @Override
     public String toString() {
         return """
-                { "cells": %s}
-                """.formatted(Arrays.toString(this.cells));
+ { "cells": %s, "instructions": "%s" }
+            """.formatted(Arrays.toString(this.cells), this.instructions);
     }
 
     private static Cell[] getCells(Game game) {
